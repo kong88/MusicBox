@@ -2,6 +2,8 @@ package com.cyl.musiclake.ui.music.mv
 
 import com.cyl.musicapi.netease.*
 import com.cyl.musiclake.api.netease.NeteaseApiServiceImpl
+import com.cyl.musiclake.api.server.ApiServiceImpl
+import com.cyl.musiclake.bean.Album2
 import com.cyl.musiclake.net.ApiManager
 import com.cyl.musiclake.net.RequestCallBack
 
@@ -51,6 +53,14 @@ class MvModel {
      */
     fun loadMvComment(mvid: String?, result: RequestCallBack<MvComment>?) {
         val observable = mvid?.let { NeteaseApiServiceImpl.getMvComment(it) } ?: return
+        ApiManager.request(observable, result)
+    }
+
+    /**
+     *获取mv数据
+     */
+    fun loadAlbum(singerId: String, result: RequestCallBack<MutableList<Album2>>) {
+        val observable = ApiServiceImpl.getAlbum(singerId)
         ApiManager.request(observable, result)
     }
 }

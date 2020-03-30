@@ -2,7 +2,6 @@ package com.cyl.musiclake.ui.music.mv;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
@@ -17,29 +16,20 @@ import java.util.List;
 
 import butterknife.BindView;
 
-/**
- * 功能：在线排行榜
- * 作者：yonglong on 2016/8/11 18:14
- * 邮箱：643872807@qq.com
- * 版本：2.5
- */
-public class MvListFragment extends BaseFragment<MvListPresenter> implements MvListContract.View {
+public class AlbumsFragment extends BaseFragment<AlbumsPresenter2> implements MvListContract.View {
 
-    private static final String TAG = "BaiduPlaylistFragment";
+    private static final String TAG = "AlbumsFragment";
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
 
-    private int mOffset = 0;
-    private String mvType = "rank";
 
     //适配器
-    private TopMvListAdapter mAdapter;
-    private List<MvInfoDetail> mvList = new ArrayList<>();
+    private AlbumsAdater mAdapter;
+    private List<Album2> mvList = new ArrayList<>();
 
-    public static MvListFragment newInstance(String type) {
+    public static AlbumsFragment newInstance() {
         Bundle args = new Bundle();
-        args.putString("type", type);
-        MvListFragment fragment = new MvListFragment();
+        AlbumsFragment fragment = new AlbumsFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -51,27 +41,20 @@ public class MvListFragment extends BaseFragment<MvListPresenter> implements MvL
 
     @Override
     public void initViews() {
-        if (getArguments() != null) {
-            mvType = getArguments().getString("type");
-        }
-
         //适配器
-        mAdapter = new TopMvListAdapter(mvList);
+        mAdapter = new AlbumsAdater(mvList);
         mAdapter.bindToRecyclerView(mRecyclerView);
-        if (mvType != null && mvType.equals("rank")) {
-            //初始化列表
-            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-            mRecyclerView.setLayoutManager(layoutManager);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mRecyclerView.setLayoutManager(layoutManager);
 
-            mAdapter.setEnableLoadMore(true);
-            mAdapter.setOnLoadMoreListener(() -> mRecyclerView.postDelayed(() -> {
-                //成功获取更多数据
-                mPresenter.loadMv(mvList.size());
-            }, 1000), mRecyclerView);
-        } else {
-            mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2, LinearLayoutManager.VERTICAL, false));
-        }
+        mAdapter.setEnableLoadMore(true);
+        mAdapter.setEnableLoadMore(false);
+        mPresenter.loadAlbum("1");
+//        mAdapter.setOnLoadMoreListener(() -> mRecyclerView.postDelayed(() -> {
+//            //成功获取更多数据
+//            mPresenter.loadAlbum("1");
+//        }, 1000), mRecyclerView);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -84,12 +67,7 @@ public class MvListFragment extends BaseFragment<MvListPresenter> implements MvL
     protected void loadData() {
         showLoading();
         mvList.clear();
-        if (mvType.equals("rank")) {
-            mPresenter.loadMv(0);
-        } else {
-            mAdapter.setEnableLoadMore(false);
-            mPresenter.loadRecentMv(30);
-        }
+        mPresenter.loadMv(0);
     }
 
     @Override
@@ -122,13 +100,13 @@ public class MvListFragment extends BaseFragment<MvListPresenter> implements MvL
 
     @Override
     public void showMvList(List<MvInfoDetail> mvList) {
-        this.mvList.addAll(mvList);
-        mAdapter.setNewData(this.mvList);
+
     }
 
     @Override
     public void showAlbumList(List<Album2> mvList) {
-
+        this.mvList.addAll(mvList);
+        mAdapter.setNewData(this.mvList);
     }
 
 }

@@ -2,6 +2,7 @@ package com.cyl.musiclake.ui.music.mv
 
 import com.cyl.musicapi.netease.MvInfo
 import com.cyl.musiclake.base.BasePresenter
+import com.cyl.musiclake.bean.Album2
 import com.cyl.musiclake.net.RequestCallBack
 import javax.inject.Inject
 
@@ -10,7 +11,7 @@ import javax.inject.Inject
  * Author : master.
  * Date   : 2018/5/20 .
  */
-class MvListPresenter @Inject
+class AlbumsPresenter2 @Inject
 constructor() : BasePresenter<MvListContract.View>(), MvListContract.Presenter {
     private val mvModel = MvModel()
     override fun loadMv(offset: Int) {
@@ -29,8 +30,18 @@ constructor() : BasePresenter<MvListContract.View>(), MvListContract.Presenter {
         })
     }
 
-    override fun loadAlbum(singerId: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun loadAlbum(singerId: String) {
+        mvModel.loadAlbum(singerId, object : RequestCallBack<MutableList<Album2>> {
+            override fun success(result: MutableList<Album2>) {
+                mView?.hideLoading()
+                mView?.showAlbumList(result.toList())
+            }
+
+            override fun error(msg: String?) {
+                mView?.showError(msg, true)
+            }
+
+        })
     }
 
     override fun loadRecentMv(limit: Int) {

@@ -71,7 +71,7 @@ public class AboutActivity extends BaseActivity {
 
     @OnClick(R.id.cardUpdateView)
     void toUpdate() {
-        Beta.checkUpgrade();
+//        Beta.checkUpgrade();
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.cyl.musicapi.netease
 import io.reactivex.Observable
 import retrofit2.http.GET
 import retrofit2.http.Query
+import kotlin.collections.List
 
 /**
  * Created by yonglong on 2017/9/11.

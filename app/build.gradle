@@ -1,22 +1,20 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
-repositories {
-    mavenCentral()
-}
+
 apply plugin: 'kotlin-android-extensions'
 android {
     signingConfigs {
         release {
-            keyAlias 'musiclake'
-            keyPassword '123123'
-            storeFile file('../app/musiclake.jks')
-            storePassword '123123'
+            storeFile file(project.PJ_STORE_FILE)
+            storePassword project.PJ_STORE_PASSWORD
+            keyAlias project.PJ_KEY_ALIAS
+            keyPassword project.PJ_KEY_PASSWORD
         }
     }
     buildToolsVersion '27.0.3'
     defaultConfig {
-        applicationId "com.cyl.musiclake"
+        applicationId "com.planet.musiclake"
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 14
@@ -26,7 +24,7 @@ android {
         android.compileOptions.targetCompatibility 1.8
         ndk {
             //设置支持的SO库架构
-            abiFilters 'armeabi', 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+            abiFilters 'armeabi', 'armeabi-v7a', 'arm64-v8a'
         }
     }
     buildTypes {

@@ -3,7 +3,6 @@ package com.cyl.musiclake.net;
 import com.cyl.musiclake.MusicApp;
 import com.cyl.musiclake.R;
 import com.cyl.musiclake.api.gson.MyGsonConverterFactory;
-import com.cyl.musiclake.bean.Music;
 import com.cyl.musiclake.event.LoginEvent;
 import com.cyl.musiclake.utils.LogUtil;
 import com.cyl.musiclake.utils.NetworkUtils;
@@ -15,6 +14,13 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -103,13 +109,27 @@ public class ApiManager {
             synchronized (ApiManager.class) {
                 Cache cache = new Cache(new File(MusicApp.getAppContext().getCacheDir(), "HttpCache"), 1024 * 1024 * 100);
                 if (mOkHttpClient == null) {
-                    mOkHttpClient = new OkHttpClient.Builder().cache(cache)
-                            .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                            .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
-                            .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
-                            .addInterceptor(mRewriteCacheControlInterceptor)
+                    try {
+                        mOkHttpClient = new OkHttpClient.Builder().cache(cache)
+
+                                .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                                .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+                                .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+                                .addInterceptor(mRewriteCacheControlInterceptor)
 //                            .addInterceptor(mLoggingInterceptor)
-                            .build();
+                                //信任所有服务器地址
+                                .hostnameVerifier(new HostnameVerifier() {
+                                    @Override
+                                    public boolean verify(String hostname, SSLSession session) {
+                                        return true;
+                                    }
+                                })
+                                .sslSocketFactory(getSSLSocketFactory())
+
+                                .build();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -193,5 +213,37 @@ public class ApiManager {
                     }
                 });
     }
+
+    //客户端不对服务器证书做任何验证
+
+    public static SSLSocketFactory getSSLSocketFactory() throws Exception {
+        //创建管理器
+        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+            @Override
+            public void checkClientTrusted(
+                    java.security.cert.X509Certificate[] x509Certificates,
+                    String s) throws java.security.cert.CertificateException {
+            }
+
+            @Override
+            public void checkServerTrusted(
+                    java.security.cert.X509Certificate[] x509Certificates,
+                    String s) throws java.security.cert.CertificateException {
+            }
+
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[]{};
+            }
+        }};
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+
+        //为OkHttpClient设置sslSocketFactory
+        return sslContext.getSocketFactory();
+
+    }
+
 
 }
